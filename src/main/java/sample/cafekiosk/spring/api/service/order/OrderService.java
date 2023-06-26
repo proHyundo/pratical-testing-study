@@ -27,9 +27,6 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final StockRepository stockRepository;
 
-    // Ctrl + Alt + M : Extract Method
-    // Ctrl + Alt + V : Extract Variable
-    // Ctrl + Shift + Arrow Up/Down : Move Line Up/Down
     /**
      * 재고 감소 -> 동시성 고민
      * 키워드 : optimistic lock, pessimistic lock 등이 있다.
