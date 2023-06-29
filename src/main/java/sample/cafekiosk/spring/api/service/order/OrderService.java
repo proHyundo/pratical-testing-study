@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sample.cafekiosk.spring.api.controller.order.request.OrderCreateRequest;
+import sample.cafekiosk.spring.api.service.order.request.OrderCreateServiceRequest;
 import sample.cafekiosk.spring.domain.order.Order;
 import sample.cafekiosk.spring.domain.order.OrderRepository;
 import sample.cafekiosk.spring.domain.product.Product;
@@ -32,7 +33,7 @@ public class OrderService {
      * 키워드 : optimistic lock, pessimistic lock 등이 있다.
      * */
 
-    public OrderResponse createOrder(OrderCreateRequest request, LocalDateTime registeredDateTime) {
+    public OrderResponse createOrder(OrderCreateServiceRequest request, LocalDateTime registeredDateTime) {
         List<String> productNumbers = request.getProductNumbers();      // 주문생성요청에서 상품번호들을 조회
         List<Product> requestedProducts = findProductsBy(productNumbers);   // 상품번호들로 상품들을 조회(상품번호 중복가능)
 

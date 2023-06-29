@@ -20,7 +20,7 @@ public class OrderProduct extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY) // 지연로딩 : OrderProduct를 select할 때 Order를 가져오지 않음
     private Order order;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Product product;
 
     public OrderProduct(Order order, Product product) {

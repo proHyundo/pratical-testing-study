@@ -47,7 +47,7 @@ class ProductServiceTest {
                 .price(5000)
                 .build();
         // when
-        ProductResponse resultProductResponse = productService.createProduct(request);
+        ProductResponse resultProductResponse = productService.createProduct(request.toServiceRequest());
         // then
         assertThat(resultProductResponse).extracting("productNumber", "type", "sellingStatus", "name", "price")
                 .containsExactly("003", ProductType.HANDMADE, ProductSellingStatus.SELLING, "카페모카", 5000);
@@ -70,7 +70,7 @@ class ProductServiceTest {
                 .price(5000)
                 .build();
         // when
-        ProductResponse resultProductResponse = productService.createProduct(request);
+        ProductResponse resultProductResponse = productService.createProduct(request.toServiceRequest());
         // then
         assertThat(resultProductResponse).extracting("productNumber", "type", "sellingStatus", "name", "price")
                 .containsExactly("001", ProductType.HANDMADE, ProductSellingStatus.SELLING, "카페모카", 5000);
