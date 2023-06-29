@@ -3,29 +3,23 @@ package sample.cafekiosk.spring.api.service.mail;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.Spy;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sample.cafekiosk.spring.client.mail.MailSendClient;
 import sample.cafekiosk.spring.domain.history.mail.MailSendHistory;
 import sample.cafekiosk.spring.domain.history.mail.MailSendHistoryRepository;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.Assertions.anyOf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.*;
 
 // @Mock 어노테이션을 사용해 Mock 객체를 생성하여 테스트 하기 위해 @ExtendWith(MockitoExtension.class) 을 사용.
 @ExtendWith(MockitoExtension.class)
-// @SpringBootTest 를 사용하지 않고 @MockBean 을 사용하여 단위테스트를 진행.
+// @SpringBootTest 를 사용하지 않고 Mock 객체를 사용하여 단위테스트를 진행.
 class MailServiceTest {
 
-    @Spy
-    MailSendClient mailSendClientSpy;
+//    @Spy
+//    MailSendClient mailSendClientSpy;
     @Mock
     MailSendClient mailSendClient;
     @Mock
@@ -83,11 +77,30 @@ class MailServiceTest {
     @Test
     void sendMailWithAutoDiUsingSpy() {
         // given
+        MailSendClient mailSendClientSpy = spy(MailSendClient.class);
+
         // @Spy 를 사용한 경우
         doReturn(true)
                 .when(mailSendClientSpy)
                 .sendEmail(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
 
+        // when
+        boolean result = mailService.sendMail("from", "to", "subject", "contents");
+
+        // then
+        assertThat(result).isTrue();
+        Mockito.verify(mailSendHistoryRepository, times(1)).save(any(MailSendHistory.class));
+    }
+    
+    @DisplayName("메일 전송 테스트 BDDMockito 사용")
+    @Test
+    void sendMailWithBDDMockito() {
+        // given
+//        Mockito.when(mailSendClient.sendEmail(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+//                .thenReturn(true);
+        // given 에서 when 메서드를 사용하는 것은 이질감이 든다. 이를 해결하기 위해 BDDMockito 를 사용한다. 이름만 BDDMockito 이다. Mockito 를 상속받고 있다.
+        BDDMockito.given(mailSendClient.sendEmail(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+                .willReturn(true);
         // when
         boolean result = mailService.sendMail("from", "to", "subject", "contents");
 
