@@ -12,6 +12,7 @@ import sample.cafekiosk.spring.client.mail.MailSendClient;
 import sample.cafekiosk.spring.domain.history.mail.MailSendHistory;
 import sample.cafekiosk.spring.domain.history.mail.MailSendHistoryRepository;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.anyOf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -24,6 +25,8 @@ import static org.mockito.Mockito.times;
 class MailServiceTest {
 
     @Spy
+    MailSendClient mailSendClientSpy;
+    @Mock
     MailSendClient mailSendClient;
     @Mock
     MailSendHistoryRepository mailSendHistoryRepository;
@@ -31,24 +34,37 @@ class MailServiceTest {
     @InjectMocks
     MailService mailService;
 
-    @DisplayName("메일 전송 테스트")
+    @DisplayName("메일 전송 테스트 수동 객체 생성&주입")
     @Test
-    void sendMail() {
+    void sendMailPassiveDi() {
         // given
-        // @Mock 어노테이션으로 대체
-//        MailSendClient mailSendClient = Mockito.mock(MailSendClient.class);
-//        MailSendHistoryRepository mailSendHistoryRepository = Mockito.mock(MailSendHistoryRepository.class);
+        // @Mock 으로 대체
+        MailSendClient mailSendClient = Mockito.mock(MailSendClient.class);
+        MailSendHistoryRepository mailSendHistoryRepository = Mockito.mock(MailSendHistoryRepository.class);
         // @InjectMocks 어노테이션으로 대체
-//        MailService mailService = new MailService(mailSendClient, mailSendHistoryRepository);
+        MailService mailService = new MailService(mailSendClient, mailSendHistoryRepository);
 
+        Mockito.when(mailSendClient.sendEmail(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(true);
+        Mockito.when(mailSendHistoryRepository.save(Mockito.any(MailSendHistory.class)))
+                .thenReturn(null);
+
+        // when
+        boolean result = mailService.sendMail("from", "to", "subject", "contents");
+
+        // then
+        assertThat(result).isTrue();
+        Mockito.verify(mailSendHistoryRepository, times(1)).save(any(MailSendHistory.class));
+
+    }
+
+    @DisplayName("메일 전송 테스트 @Mock 객체 사용")
+    @Test
+    void sendMailWithAutoDiUsingMock() {
+        // given
         // @Mock 을 사용한 경우
-//        Mockito.when(mailSendClient.sendEmail(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
-//                .thenReturn(true);
-        // @Spy 를 사용한 경우
-        doReturn(true)
-                .when(mailSendClient)
-                .sendEmail(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
-
+        Mockito.when(mailSendClient.sendEmail(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(true);
 
         // save 행위에 대해 Mocking 하지 않아도,
         // Mockito 의 public static final Answer<Object> RETURNS_DEFAULTS = Answers.RETURNS_DEFAULTS; 설정에 의해
@@ -56,9 +72,25 @@ class MailServiceTest {
 //        Mockito.when(mailSendHistoryRepository.save(Mockito.any(MailSendHistory.class)))
 //                .thenReturn(null);
 
+        // when
+        boolean result = mailService.sendMail("from", "to", "subject", "contents");
+        // then
+        assertThat(result).isTrue();
+        Mockito.verify(mailSendHistoryRepository, times(1)).save(any(MailSendHistory.class));
+    }
+
+    @DisplayName("메일 전송 테스트 @Spy 객체 사용")
+    @Test
+    void sendMailWithAutoDiUsingSpy() {
+        // given
+        // @Spy 를 사용한 경우
+        doReturn(true)
+                .when(mailSendClientSpy)
+                .sendEmail(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
 
         // when
         boolean result = mailService.sendMail("from", "to", "subject", "contents");
+
         // then
         assertThat(result).isTrue();
         Mockito.verify(mailSendHistoryRepository, times(1)).save(any(MailSendHistory.class));
