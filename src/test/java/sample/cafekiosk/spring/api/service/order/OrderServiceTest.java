@@ -159,7 +159,7 @@ class OrderServiceTest {
 
     @DisplayName("재고가 부족한 상품으로 주문을 생성하려는 경우 예외가 발생한다.")
     @Test
-    void createOrderWithStock2() {
+    void createOrderWithNoStock() {
         // given
         LocalDateTime registeredDateTime = LocalDateTime.now();
         Product product1 = createProduct("001", BOTTLE, 4_000);
@@ -169,6 +169,10 @@ class OrderServiceTest {
 
         Stock stock1 = Stock.create("001", 2);
         Stock stock2 = Stock.create("002", 2);
+        stock1.deductQuantity(1);   // TODO 문제점
+                                    // 1) Order 를 생성하는 테스트에서 재고를 차감하는 행위를 포함하고 있다.
+                                    // 2) given 의 로직이 복잡해지고 있다.
+                                    // 3) 테스트하고자 하는 기능이 아닌 다른 기능때문에 예외가 발생할 수 있는 잠재 위험.
         stockRepository.saveAll(List.of(stock1, stock2));
 
         OrderCreateServiceRequest request = OrderCreateServiceRequest.builder()
